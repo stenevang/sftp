@@ -15,6 +15,9 @@ R package with convenience functions for SFTP operations wrapping RCurl function
 * sftp_removedir
 * sftp_changedir
 
+### Motto
+_Cool data science is sexy, but it is also nice to get hold of the data to begin with_
+
 ### TODO
 
 * Add support for keyfiles
