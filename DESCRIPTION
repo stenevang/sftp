@@ -1,0 +1,15 @@
+Package: sftp
+Title: SFTP file operations
+Version: 0.0.0.9001
+Date: 2018-03-28
+Authors@R: person("Theodor", "Stenevang Klemming", email = "theodor@stenevang.net", role = c("aut", "cre"))
+Description: Functions for transferring and listing files and folders in SFTP accounts 
+    with better ease of use compared to the underlying RCurl functions.
+Depends: R (>= 3.4.4)
+License: GNU GENERAL PUBLIC LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    RCurl,
+    tidyr
+RoxygenNote: 6.0.1
