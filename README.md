@@ -26,3 +26,9 @@ _Cool data science is sexy, but it is also nice to get hold of the data to begin
 ### TODO
 
 * Add support for keyfiles
+
+### Installation
+
+Get hold of this package by running these lines of code in R:  
+```install.packages("devtools") # unless you already have it installed
+devtools::install_github("stenevang/sftp")```
