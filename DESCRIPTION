@@ -1,7 +1,7 @@
 Package: sftp
 Title: SFTP file operations
-Version: 0.0.0.9001
-Date: 2018-03-28
+Version: 0.0.0.9002
+Date: 2018-03-29
 Authors@R: person("Theodor", "Stenevang Klemming", email = "theodor@stenevang.net", role = c("aut", "cre"))
 Description: Functions for transferring and listing files and folders in SFTP accounts 
     with better ease of use compared to the underlying RCurl functions.
