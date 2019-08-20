@@ -14,9 +14,9 @@ where you are currently standing according to the sftp connection list
 object you are using (default 'stfp_con'). A subfolder or a subsubfolder etc
 can be removed in one single operation by supplying a path,
 like "folder1/folder2/folder3". That will remove the last folder in the path, in
-this case "folder3", provided it is am empty folder. NOTE! Non-empty directories cannot be removed.}
+this case "folder3". NOTE! Non-empty directories cannot be removed.}
 
-\item{sftp_connection}{A list object created  by calling \code{\link{sftp_connect}}.
+\item{sftp_connection}{A list object created  by calling \link{sftp_connect}.
 Default is \code{sftp_con}.}
 
 \item{verbose}{Logical. Turn on messages to console. Default is TRUE}
@@ -30,7 +30,8 @@ The function returns the number folders deleted.
 \description{
 Remove one or several directories (subdirectories) in an SFTP account.
 The function uses connection credentials from a list object
-created by calling \code{\link{sftp_connect}}.
+created by calling \link{sftp_connect}.
+Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 }
 \examples{
 
@@ -38,15 +39,15 @@ created by calling \code{\link{sftp_connect}}.
 sftp_removedir("this_folder_is_bad")
 
 # explicit - remove a directory at the end of a multi-level path
-sftp_makedir(foldername = "level1/folder2/directory3",
+sftp_removedir(foldername = "level1/folder2/directory3",
              sftp_connection = sftp_con,
              verbose = TRUE,
              curlPerformVerbose = FALSE)
 
-# remove several folders as specified in a vector with names
-sftp_makedir(removefolders$names)
+# remove several folders as specified in a vector of names
+sftp_removedir(removefolders$names)
 
 }
 \seealso{
-\code{\link{sftp_makedir}}, \code{\link{sftp_rename}}, \code{\link{sftp_changedir}}
+\link{sftp_makedir}, \link{sftp_rename}, \link{sftp_changedir}, \link{sftp}
 }

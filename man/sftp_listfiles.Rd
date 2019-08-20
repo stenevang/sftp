@@ -5,22 +5,25 @@
 \title{List files in an SFTP directory}
 \usage{
 sftp_listfiles(sftp_connection = sftp_con, verbose = TRUE,
-  curlPerformVerbose = FALSE)
+  curlPerformVerbose = FALSE, recurse = FALSE)
 }
 \arguments{
-\item{sftp_connection}{A list created by calling \code{\link{sftp_connect}}
+\item{sftp_connection}{A list created by calling \link{sftp_connect}
 Default value is "sftp_con".}
 
 \item{verbose}{Logical. Turn on messages to console. Default is TRUE.}
 
 \item{curlPerformVerbose}{Logical. Turn on messages to console from RCurl::curlPerform.
 Default is FALSE.}
+
+\item{recurse}{Logical. Recurse directories? Default is FALSE.}
 }
 \value{
 A dataframe
 }
 \description{
-Convenience function wrapping sftp_list with type hard set to "file".
+Convenience function wrapping \link{sftp_list} with type hard-set to "file".
+Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 }
 \examples{
 
@@ -34,5 +37,5 @@ files <- sftp_listfiles(sftp_connection = sftp_con,
 
 }
 \seealso{
-\code{\link{sftp_listdirs}}, \code{\link{sftp_list}}
+\link{sftp_listdirs}, \link{sftp_list}, \link{sftp}
 }

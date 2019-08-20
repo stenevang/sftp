@@ -12,9 +12,9 @@ sftp_rename(from, to, sftp_connection = sftp_con, verbose = TRUE,
 the first value will be used, and there will be a warning.}
 
 \item{to}{A single name of an existing file or folder. If a vector of names is supplied, only
-the first value will be used, and there will be a warning.  #'}
+the first value will be used, and there will be a warning.}
 
-\item{sftp_connection}{A list object created by calling \code{\link{sftp_connect}}.
+\item{sftp_connection}{A list object created by calling \link{sftp_connect}.
 Default is \code{sftp_con}.}
 
 \item{verbose}{Logical. Turn on messages to console. Default is TRUE}
@@ -27,14 +27,14 @@ The function returns TRUE if successful.
 }
 \description{
 Specify a current name and a new name, for a file or folder existing in an SFTP account.
-While folders must be empty when using \code{\link{sftp_removedir}}, that is not the case with
+While folders must be empty when using \link{sftp_removedir}, that is not the case with
 \code{sftp_rename} - non-empty folders can be renamed.
+Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 }
 \examples{
 
-# minimal - rename single file, rely on defaults
-sftp_rename(from = "oldname.csv",
-            to = "newname.csv")
+# minimal - rely on defaults
+sftp_rename("oldname.csv", "newname.csv")
 
 # explicit - rename a folder
 sftp_rename(from = "old_folder_name",
@@ -45,5 +45,5 @@ sftp_rename(from = "old_folder_name",
 
 }
 \seealso{
-\code{\link{sftp_download}}, \code{\link{sftp_upload}}, \code{\link{sftp_delete}}
+\link{sftp_download}, \link{sftp_upload}, \link{sftp_delete}, \link{sftp}
 }

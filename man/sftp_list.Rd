@@ -5,27 +5,33 @@
 \title{List files and/or folders in an SFTP directory}
 \usage{
 sftp_list(sftp_connection = sftp_con, verbose = TRUE,
-  curlPerformVerbose = FALSE, type)
+  curlPerformVerbose = FALSE, encoding = "UTF-8", type = "all",
+  recurse = F)
 }
 \arguments{
-\item{sftp_connection}{A list created by calling \code{\link{sftp_connect}}
-Default value is "sftp_con".}
+\item{sftp_connection}{A list created by calling \link{sftp_connect}
+Default value is \code{sftp_con}.}
 
 \item{verbose}{Logical. Turn on messages to console. Default is TRUE.}
 
 \item{curlPerformVerbose}{Logical. Turn on messages to console from RCurl::curlPerform.
 Default is FALSE.}
 
-\item{type}{One of "f", "file" (for list files), "d", "dir", "directory" (for list directories), "all" (for both files and directories)}
+\item{encoding}{Explicitly identifies the encoding of the content that is returned by the server in its response. Possible values are ‘UTF-8’ or ‘ISO-8859-1’. Default is 'UTF-8'.}
+
+\item{type}{One of "f", "file" (for list files), "d", "dir", "directory" (for list directories), "all" (for both files and directories, default).}
+
+\item{recurse}{Logical. Recurse directories? Default is FALSE.}
 }
 \value{
 A dataframe
 }
 \description{
-This function lists files or folders or both in the SFTP location
-specified by a list object created by calling \code{\link{sftp_connect}}.
+This function lists files, or folders, or both in the SFTP location
+specified by a list object created by calling \link{sftp_connect}.
 Convenience wrapper functions are available:
-\code{\link{sftp_listfiles}} and \code{\link{sftp_listdirs}}
+\link{sftp_listfiles} and \link{sftp_listdirs}
+Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 }
 \examples{
 
@@ -40,5 +46,5 @@ files_and_folders <- sftp_list(sftp_connection = sftp_con,
 
 }
 \seealso{
-\code{\link{sftp_listfiles}}, \code{\link{sftp_listdirs}}
+\link{sftp_listfiles}, \link{sftp_listdirs}, \link{sftp}
 }

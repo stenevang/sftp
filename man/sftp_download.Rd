@@ -13,9 +13,10 @@ all files on the SFTP url will be downloaded. NOTE! Folders (directories) will n
 be downloaded.}
 
 \item{tofolder}{A string containing a valid path - relative or absolute - to
-the folder where the files will be saved. Default is the working directory.}
+the folder where the files will be saved. Default is the working directory.
+If the folder does not exist it will be created.}
 
-\item{sftp_connection}{A list object created with \code{link{sftp_connect}}. Default is \code{sftp_con}.}
+\item{sftp_connection}{A list object created with \code{link{sftp_connect}}. Default is 'sftp_con'.}
 
 \item{verbose}{Logical. Turn on messages to console. Default is TRUE.}
 }
@@ -25,14 +26,15 @@ The function returns the number of files downloaded, following successful downlo
 \description{
 This function is used for downloading files from an SFTP account.
 The function uses connection credentials from a list object
-created by calling \code{\link{sftp_connect}}. The files will be downloaded from
+created by calling \link{sftp_connect}. The files will be downloaded from
 the SFTP account folder where you are currently "standing" as specified in the
 connection list object.
+Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 }
 \examples{
 
-# minimal - take all files on the SFTP url and saves in the working directory
-sftp_download(file = "*")
+# minimal - take all files on the SFTP url and save in the working directory
+sftp_download("*")
 
 # take a vector of file names from a dataframe
 sftp_download(file = files$name, tofolder = "my/relative/path")
@@ -40,11 +42,9 @@ sftp_download(file = files$name, tofolder = "my/relative/path")
 # take one specific file name from a vector from a dataframe
 sftp_download(file = files$name[1], tofolder = getwd() )
 
-# take all files that exist on the SFTP url by using wildcard
-sftp_download(file = "*", tofolder = getwd() )
 
 
 }
 \seealso{
-\code{\link{sftp_upload}}, \code{\link{sftp_delete}}, \code{\link{sftp_rename}}
+\link{sftp_upload}, \link{sftp_delete}, \link{sftp_rename}, \link{sftp}
 }

@@ -5,17 +5,19 @@
 \title{Upload files to an SFTP account}
 \usage{
 sftp_upload(file, fromfolder = getwd(), sftp_connection = sftp_con,
-  verbose = TRUE)
+  log_file = NA, verbose = TRUE)
 }
 \arguments{
 \item{file}{A character vector of file names. If the wildcard "*" is used, then
 all files in \code{fromfolder} will be uploaded. NOTE! Names of folders (directories)
-cannot be part of \code{file}. To create folders on the SFTP server, see \code{\link{sftp_makedir}}}
+cannot be part of \code{file}. To create folders on the SFTP server, please see \link{sftp_makedir}}
 
 \item{fromfolder}{A string containing a valid path - relative or absolute - to
 the folder where the files in \code{file} can be found. Default is the working directory.}
 
 \item{sftp_connection}{A list object created with \code{link{sftp_connect}}. Default is \code{sftp_con}.}
+
+\item{log_file}{Valid path to a text file (.txt, .csv, .log etc) including filename and file extension.}
 
 \item{verbose}{Logical. Turn on messages to console. Default is TRUE.}
 }
@@ -25,14 +27,15 @@ The function returns the number of files uploaded, following successful upload.
 \description{
 This function is used for uploading files to an SFTP account.
 The function uses connection credentials from a list object
-created by calling \code{\link{sftp_connect}}. The files will be uploaded to
+created by calling \link{sftp_connect}. The files will be uploaded to
 the SFTP account folder where you are currently "standing" as specified in the
 connection list object.
+Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 }
 \examples{
 
-# minimal - take all files in the current working directory
-sftp_upload(file = "*")
+# minimal - upload all files in the current working directory
+sftp_upload("*")
 
 # take a vector of file names from a dataframe
 sftp_upload(file = files$name, fromfolder = "my/relative/path/")
@@ -40,11 +43,9 @@ sftp_upload(file = files$name, fromfolder = "my/relative/path/")
 # take one specific file name from a vector from a dataframe
 sftp_upload(file = files$name[1], fromfolder = getwd())
 
-# take all files that exist in fromfolder by using wildcard
-sftp_upload(file = "*", fromfolder = getwd())
 
 
 }
 \seealso{
-\code{\link{sftp_download}}, \code{\link{sftp_delete}}, \code{\link{sftp_rename}}
+\link{sftp_download}, \link{sftp_delete}, \link{sftp_rename}, \link{sftp}
 }

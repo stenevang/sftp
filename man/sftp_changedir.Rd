@@ -11,13 +11,13 @@ sftp_changedir(tofolder, current_connection_name = "sftp_con",
 \item{tofolder}{A character vector of length 1 containing the name
 of a folder to where you want to go. The folder(s) will be looked for below the folder
 where you are currently standing according to the sftp connection list
-object you are using (default \code{stfp_con}). A subfolder or a sub-subfolder etc
+object you are using (default 'stfp_con'). A subfolder or a sub-subfolder etc
 can be specified in one single operation by supplying a path,
 like "folder1/folder2/folder3". To move up one level in the folder hierarchy, use ".."
 To go to the root folder, use "root".}
 
 \item{current_connection_name}{A string giving the name of the SFTP connection
-list object currently used, created  by calling \code{\link{sftp_connect}}.
+list object currently used, created  by calling \link{sftp_connect}.
 Default is \code{"sftp_con"}.}
 
 \item{verbose}{Logical. Turn on messages to console. Default is TRUE}
@@ -26,12 +26,13 @@ Default is \code{"sftp_con"}.}
 Default is FALSE.}
 }
 \value{
-The function returns the number folders deleted.
+The function returns TRUE after successful change of directory.
 }
 \description{
-Change your "current directory" used by the sftp family functions in this package.
-The function uses and modifies the connection credentials from a list object
-created by calling \code{\link{sftp_connect}}.
+Change your "current directory" used by the sftp functions.
+The function uses and modifies the connection credentials in a list object
+created by calling \link{sftp_connect}.
+Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 }
 \examples{
 
@@ -50,5 +51,5 @@ sftp_changedir(tofolder = "level1/folder2/directory3",
 
 }
 \seealso{
-\code{\link{sftp_makedir}}, \code{\link{sftp_removedir}}, \code{\link{sftp_rename}}
+\link{sftp_makedir}, \link{sftp_removedir}, \link{sftp_rename}, \link{sftp}
 }

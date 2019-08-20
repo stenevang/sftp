@@ -15,7 +15,7 @@ object you are using (default 'stfp_con'). A folder with subfolder and
 subsubfolder etc can be created in one single operation by supplying a path,
 like "folder1/folder2/folder3".}
 
-\item{sftp_connection}{A list object created  by calling \code{\link{sftp_connect}}.
+\item{sftp_connection}{A list object created  by calling \link{sftp_connect}.
 Default is \code{sftp_con}.}
 
 \item{verbose}{Logical. Turn on messages to console. Default is TRUE}
@@ -29,7 +29,8 @@ The function returns the number of new folders created.
 \description{
 Create one or several directories (subdirectories) in an SFTP account.
 The function uses connection credentials from a list object
-created by calling \code{\link{sftp_connect}}.
+created by calling \link{sftp_connect}.
+Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 }
 \examples{
 
@@ -47,5 +48,5 @@ sftp_makedir(foldername = "level1/folder2/directory3",
 
 }
 \seealso{
-\code{\link{sftp_removedir}}, \code{\link{sftp_rename}}, \code{\link{sftp_changedir}}
+\link{sftp_removedir}, \link{sftp_rename}, \link{sftp_changedir}, \link{sftp}
 }

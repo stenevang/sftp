@@ -4,13 +4,13 @@
 \alias{sftp_connect}
 \title{Create a list object with SFTP connection details}
 \usage{
-sftp_connect(server = "", folder = "", username = "", password = "",
-  protocol = "sftp://", port = "22")
+sftp_connect(server = "", folder = "", username = "",
+  password = "", protocol = "sftp://", port = 22)
 }
 \arguments{
 \item{server}{This is the SFTP server URL or hostname or IP-adress.}
 
-\item{folder}{This is the path to the folder where you want to act. The value
+\item{folder}{This is the path to the folder where you want to operate. The value
 can be a single folder name in the SFTP root or a path with subfolders,
 like 'dir1/dir2/dir3'. Note that directory names are CaSe SeNsItIvE. Default
 is empty string, which takes you to the root folder.}
@@ -21,7 +21,9 @@ and call it using \code{Sys.getenv}}
 
 \item{password}{The SFTP account password. It is recommended to not store
 your password in any script, but instead create a System Environment Variable
-and call it using \code{Sys.getenv}}
+and call it using \code{Sys.getenv} IMPORTANT! Your password MUST NOT contain
+the colon character : or the at-sign @ since these characters have special use
+as delimiters in the connection string!}
 
 \item{protocol}{Default is 'sftp://'. You will probably never change this value.}
 
@@ -29,26 +31,33 @@ and call it using \code{Sys.getenv}}
 an SFTP server could be set up to respond on a port other than the default port 22.}
 }
 \value{
-the function returns a list of strings which are used by all other sftp
+The function returns a list of strings which are used by all other
 functions in the sftp package when connecting to an SFTP server.
 }
 \description{
-\code{sftp_connect} outputs a list which is used as an argument value to
-all other functions in the sftp package. Recommended practice is to
+\code{sftp_connect} outputs a list which is used as an argument to
+all other functions of the sftp package. Recommended practice is to
 store the output as \code{sftp_con} since that is the object name all other
-sftp functions look for by default.
+sftp functions look for by default. IMPORTANT! Your password MUST NOT contain
+the colon character : or the at-sign @ since these characters have special use
+as delimiters in the connection string!
+Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 }
 \examples{
 
-sftp_con <- sftp_connect(server = "sftpserver.foo",
+# minimal - rely on defaults
+sftp_con <- sftp_connect(username = Sys.getenv("MY_SFTP_USER"),
+                         password = Sys.getenv("MY_SFTP_PASS"))
+
+# explicit
+sftp_con <- sftp_connect(server = "mysftp.com",
                          folder = "myfolder",
                          username = Sys.getenv("MY_SFTP_USER"),
                          password = Sys.getenv("MY_SFTP_PASS"),
                          protocol = "sftp://",
-                         port = "22")
+                         port = 22)
 
 }
 \seealso{
-Any other functions in the sftp package. See listing
-by doing \code{?sftp}
+See listing here: \link{sftp}
 }
