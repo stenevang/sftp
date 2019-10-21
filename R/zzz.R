@@ -6,5 +6,5 @@
     require(tidyr)
 
     # welcome
-    message("package sftp v 2.0.0 by Theodor Stenevang Klemming")
+    message("package sftp v 2.0.1 by Theodor Stenevang Klemming")
 }
