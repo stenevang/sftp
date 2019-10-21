@@ -323,7 +323,7 @@ sftp_listdirs <- function(sftp_connection = sftp_con,
                           curlPerformVerbose = FALSE,
                           recurse = FALSE) {
 
-    final <- sftp_list(sftp_connection = sft_connection,
+    final <- sftp_list(sftp_connection = sftp_connection,
                        verbose = verbose,
                        curlPerformVerbose = curlPerformVerbose,
                        type = "dir",
