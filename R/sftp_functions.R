@@ -195,21 +195,20 @@ sftp_list <- function(sftp_connection = sftp_con,
     }
 
     cond_message(paste("SFTP url:", sftp_connection$url))
-    curlOptionsValue <- "ftplistonly = T"
     # message(Sys.time(), " begin RCurl")
     rawstring <- RCurl::getURL(url = sftp_connection$url,
                                port = sftp_connection$port,
                                userpwd = sftp_connection$userpass,
                                verbose = curlPerformVerbose,
                                ftp.use.epsv = FALSE,
-                               .encoding = encoding,
-                               .opts = RCurl::curlOptions(curlOptionsValue) )
+                               .encoding = encoding)
     # message(Sys.time(), " end RCurl")
     separated <- strsplit(rawstring, "\n", fixed = T)
     vector <- separated[[1]]
-    vector2 <- gsub(" ", ";", vector)
-    vector3 <- gsub(";+", ";", vector2)
-    df <- data.frame("files" = vector3, stringsAsFactors = F)
+    pattern <- "([a-z-]+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S.*)$"
+    replacement <- paste("\\", 1:9, sep = "", collapse = ";")
+    vector2 <- sub(pattern, replacement, vector)
+    df <- data.frame("files" = vector2, stringsAsFactors = F)
     df2 <- df %>% tidyr::separate(files, c("rights", "links", "ownername", "ownergroup", "filesize", "t1", "t2", "t3", "name"), sep = ";", extra = "merge")
     df2$name <- gsub(";", " ", df2$name)
     df2$type <- ifelse(grepl("^d.*", df2$rights), "dir", "file" )
