@@ -1,10 +1,4 @@
-# run at package load
-.onLoad <- function(libname, pkgname){
-
-    # lazy load packages
-    require(RCurl)
-    require(tidyr)
-
-    # welcome
-    message("package sftp v 2.0.1 by Theodor Stenevang Klemming")
+# run at package attachment by library()
+.onAttach <- function(libname, pkgname){
+    packageStartupMessage("Package sftp v 2.0.2 by Theodor Stenevang Klemming\nUse ?sftp or sftp() for a menu of functions")
 }
