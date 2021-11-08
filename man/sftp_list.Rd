@@ -4,9 +4,14 @@
 \alias{sftp_list}
 \title{List files and/or folders in an SFTP directory}
 \usage{
-sftp_list(sftp_connection = sftp_con, verbose = TRUE,
-  curlPerformVerbose = FALSE, encoding = "UTF-8", type = "all",
-  recurse = F)
+sftp_list(
+  sftp_connection = sftp_con,
+  verbose = TRUE,
+  curlPerformVerbose = FALSE,
+  encoding = "UTF-8",
+  type = "all",
+  recurse = F
+)
 }
 \arguments{
 \item{sftp_connection}{A list created by calling \link{sftp_connect}

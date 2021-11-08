@@ -4,8 +4,12 @@
 \alias{sftp_makedir}
 \title{Create a new directory in an SFTP account}
 \usage{
-sftp_makedir(foldername, sftp_connection = sftp_con, verbose = TRUE,
-  curlPerformVerbose = FALSE)
+sftp_makedir(
+  foldername,
+  sftp_connection = sftp_con,
+  verbose = TRUE,
+  curlPerformVerbose = FALSE
+)
 }
 \arguments{
 \item{foldername}{A character vector of length 1 or more, containing the names

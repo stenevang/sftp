@@ -4,8 +4,12 @@
 \alias{sftp_changedir}
 \title{Move to another directory in an SFTP account}
 \usage{
-sftp_changedir(tofolder, current_connection_name = "sftp_con",
-  verbose = TRUE, curlPerformVerbose = FALSE)
+sftp_changedir(
+  tofolder,
+  current_connection_name = "sftp_con",
+  verbose = TRUE,
+  curlPerformVerbose = FALSE
+)
 }
 \arguments{
 \item{tofolder}{A character vector of length 1 containing the name

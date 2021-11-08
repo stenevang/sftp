@@ -4,8 +4,14 @@
 \alias{sftp_connect}
 \title{Create a list object with SFTP connection details}
 \usage{
-sftp_connect(server = "", folder = "", username = "",
-  password = "", protocol = "sftp://", port = 22)
+sftp_connect(
+  server = "",
+  folder = "",
+  username = "",
+  password = "",
+  protocol = "sftp://",
+  port = 22
+)
 }
 \arguments{
 \item{server}{This is the SFTP server URL or hostname or IP-adress.}

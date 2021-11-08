@@ -4,8 +4,12 @@
 \alias{sftp_removedir}
 \title{Remove a new directory in an SFTP account}
 \usage{
-sftp_removedir(foldername, sftp_connection = sftp_con, verbose = TRUE,
-  curlPerformVerbose = FALSE)
+sftp_removedir(
+  foldername,
+  sftp_connection = sftp_con,
+  verbose = TRUE,
+  curlPerformVerbose = FALSE
+)
 }
 \arguments{
 \item{foldername}{A character vector of length 1 or more, containing the names

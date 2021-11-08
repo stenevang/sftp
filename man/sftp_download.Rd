@@ -4,8 +4,12 @@
 \alias{sftp_download}
 \title{Download files from an SFTP account}
 \usage{
-sftp_download(file, tofolder = getwd(), sftp_connection = sftp_con,
-  verbose = TRUE)
+sftp_download(
+  file,
+  tofolder = getwd(),
+  sftp_connection = sftp_con,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{file}{A character vector of file names. If the wildcard "*" is used, then

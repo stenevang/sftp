@@ -4,7 +4,6 @@
 \encoding{UTF-8}
 \name{sftp}
 \alias{sftp}
-\alias{sftp-package}
 \title{sftp package help menu}
 \usage{
 sftp()

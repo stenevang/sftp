@@ -4,8 +4,12 @@
 \alias{sftp_delete}
 \title{Delete files in an SFTP account}
 \usage{
-sftp_delete(file, sftp_connection = sftp_con, verbose = TRUE,
-  curlPerformVerbose = FALSE)
+sftp_delete(
+  file,
+  sftp_connection = sftp_con,
+  verbose = TRUE,
+  curlPerformVerbose = FALSE
+)
 }
 \arguments{
 \item{file}{A vector of one or more file names that exist on the SFTP url.

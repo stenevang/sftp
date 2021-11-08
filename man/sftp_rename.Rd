@@ -4,8 +4,13 @@
 \alias{sftp_rename}
 \title{Rename a single file or single directory in an SFTP account}
 \usage{
-sftp_rename(from, to, sftp_connection = sftp_con, verbose = TRUE,
-  curlPerformVerbose = FALSE)
+sftp_rename(
+  from,
+  to,
+  sftp_connection = sftp_con,
+  verbose = TRUE,
+  curlPerformVerbose = FALSE
+)
 }
 \arguments{
 \item{from}{A single name of an existing file or folder. If a vector of names is supplied, only
