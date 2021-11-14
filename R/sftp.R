@@ -15,7 +15,6 @@
 #' \code{\link{sftp_removedir}}\cr
 #' \code{\link{sftp_rename}}\cr
 #' \code{\link{sftp_upload}}\cr
-#' \code{\link{trim_slashes}}\cr
 #'
 #' @docType package
 #' @name sftp

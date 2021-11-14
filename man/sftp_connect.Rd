@@ -5,7 +5,7 @@
 \title{Create a list object with SFTP connection details}
 \usage{
 sftp_connect(
-  server = "",
+  server = "localhost",
   folder = "",
   username = "",
   password = "",
@@ -14,7 +14,7 @@ sftp_connect(
 )
 }
 \arguments{
-\item{server}{This is the SFTP server URL or hostname or IP-adress.}
+\item{server}{This is the SFTP server URL or hostname or IP-adress. Default is localhost.}
 
 \item{folder}{This is the path to the folder where you want to operate. The value
 can be a single folder name in the SFTP root or a path with subfolders,

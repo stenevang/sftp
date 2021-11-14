@@ -1,56 +1,4 @@
 
-#' SFTP operations tools
-#'
-#' Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
-#'
-#' \link{sftp} is a function that loads the help documentation you are reading now.
-#'
-#' _____________________________________________________________________________
-#'
-#' \bold{CONNECT:}
-#'
-#' \link{sftp_connect}
-#'
-#' _____________________________________________________________________________
-#'
-#' \bold{TRANSFER:}
-#'
-#' \link{sftp_upload} \cr
-#' \link{sftp_download}
-#'
-#' _____________________________________________________________________________
-#'
-#' \bold{NAVIGATE:}
-#'
-#' \link{sftp_list} \cr
-#' \link{sftp_listdirs} \cr
-#' \link{sftp_listfiles} \cr
-#' \link{sftp_changedir}
-#'
-#' _____________________________________________________________________________
-#'
-#' \bold{CREATE:}
-#'
-#' \link{sftp_makedir} \cr
-#' \link{sftp_removedir} \cr
-#' \link{sftp_rename} \cr
-#' \link{sftp_delete}
-#'
-#'
-#'
-#' @export
-
-
-
-# internal function - not exported #############################################
-trim_slashes <- function(string) {
-    #string <- gsub("^/{1,2}", "", string) # remove any leading slash
-    string <- gsub("/{1,2}$", "", string) # remove any trailing slash
-    return(string)
-} # end of internal function trim_slashes ####################################
-
-
-
 #' Create a list object with SFTP connection details
 #'
 #' \code{sftp_connect} outputs a list which is used as an argument to
@@ -61,7 +9,7 @@ trim_slashes <- function(string) {
 #' as delimiters in the connection string!
 #' Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 #'
-#' @param server This is the SFTP server URL or hostname or IP-adress.
+#' @param server This is the SFTP server URL or hostname or IP-adress. Default is localhost.
 #' @param folder This is the path to the folder where you want to operate. The value
 #' can be a single folder name in the SFTP root or a path with subfolders,
 #' like 'dir1/dir2/dir3'. Note that directory names are CaSe SeNsItIvE. Default
@@ -97,7 +45,7 @@ trim_slashes <- function(string) {
 #' @seealso See listing here: \link{sftp}
 #'
 #' @export
-sftp_connect <- function(server   = "",
+sftp_connect <- function(server   = "localhost",
                          folder   = "",
                          username = "",
                          password = "",
@@ -210,12 +158,13 @@ sftp_list <- function(sftp_connection = sftp_con,
     vector2 <- gsub(" ", ";", vector)
     vector3 <- gsub(";+", ";", vector2)
     df <- data.frame("files" = vector3, stringsAsFactors = F)
-    df2 <- df %>% tidyr::separate(files, c("rights", "links", "ownername", "ownergroup", "filesize", "t1", "t2", "t3", "name"), sep = ";", extra = "merge")
+    df2 <- tidyr::separate(df, files, c("rights", "links", "ownername", "ownergroup", "filesize", "t1", "t2", "t3", "name"), sep = ";", extra = "merge")
     df2$name <- gsub(";", " ", df2$name)
     df2$type <- ifelse(grepl("^d.*", df2$rights), "dir", "file" )
 
     if (recurse) {
-        dirs_found <- df2 %>% dplyr::filter(type == "dir", !name %in% c(".", "..")) %>% pull(name)
+        dirs_found <- dplyr::filter(df2, type == "dir", !name %in% c(".", ".."))
+        dirs_found <- dirs_found$name
          for (d in dirs_found) {
                 d_con <- sftp_connect(server = sftp_connection$server,
                                       folder = paste0(sftp_connection$folder, "/", d),
@@ -225,12 +174,11 @@ sftp_list <- function(sftp_connection = sftp_con,
                                       port     = sftp_connection$port)
                 d_list <- sftp_list(sftp_connection = d_con,
                                     recurse = T)
-                d_list <- d_list %>%
-                  dplyr::filter(!name %in% c(".", ".."))%>%
-                  dplyr::mutate(name = paste0(d, "/", name))
+                d_list <- dplyr::filter(d_list, !name %in% c(".", ".."))
+                d_list$name <- paste0(d, "/", d_list$name)
 
-                df2 <- dplyr::bind_rows(df2, d_list) %>%
-                  dplyr::arrange(name)
+                df2 <- rbind(df2, d_list)
+                df2 <- df2[order(df2$name), ]
 
          }
     }
@@ -906,10 +854,4 @@ sftp_changedir <- function(tofolder,
 
 
 
-# INTERNAL FUNCTION ############################################################
 
-sftp_log <- function(message,
-                     log_file) {
-  readr::write_lines(x = paste(Sys.time(), message, "\r"), path = log_file, append = T)
-}
-################################################################################
