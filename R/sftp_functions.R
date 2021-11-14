@@ -155,15 +155,20 @@ sftp_list <- function(sftp_connection = sftp_con,
     # message(Sys.time(), " end RCurl")
     separated <- strsplit(rawstring, "\n", fixed = T)
     vector <- separated[[1]]
-    vector2 <- gsub(" ", ";", vector)
-    vector3 <- gsub(";+", ";", vector2)
-    df <- data.frame("files" = vector3, stringsAsFactors = F)
-    df2 <- tidyr::separate(df, files, c("rights", "links", "ownername", "ownergroup", "filesize", "t1", "t2", "t3", "name"), sep = ";", extra = "merge")
-    df2$name <- gsub(";", " ", df2$name)
-    df2$type <- ifelse(grepl("^d.*", df2$rights), "dir", "file" )
+    pattern <- "^([drwx-]{10})\\s+(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+([A-z]{3})\\s+(\\d{1,2})\\s+([0-9:]{4,5})\\s+(.+)$"
+    df <- data.frame("rights" = gsub(pattern, "\\1", vector),
+                     "links" = gsub(pattern, "\\2", vector),
+                     "ownername" = gsub(pattern, "\\3", vector),
+                     "ownergroup" = gsub(pattern, "\\4", vector),
+                     "filesize" = gsub(pattern, "\\5", vector),
+                     "t1" = gsub(pattern, "\\6", vector),
+                     "t2" = gsub(pattern, "\\7", vector),
+                     "t3" = gsub(pattern, "\\8", vector),
+                     "name" = gsub(pattern, "\\9", vector), stringsAsFactors = F )
+    df$type <- ifelse(grepl("^d.*", df$rights), "dir", "file" )
 
     if (recurse) {
-        dirs_found <- dplyr::filter(df2, type == "dir", !name %in% c(".", ".."))
+        dirs_found <- dplyr::filter(df, type == "dir", !name %in% c(".", ".."))
         dirs_found <- dirs_found$name
          for (d in dirs_found) {
                 d_con <- sftp_connect(server = sftp_connection$server,
@@ -177,20 +182,20 @@ sftp_list <- function(sftp_connection = sftp_con,
                 d_list <- dplyr::filter(d_list, !name %in% c(".", ".."))
                 d_list$name <- paste0(d, "/", d_list$name)
 
-                df2 <- rbind(df2, d_list)
-                df2 <- df2[order(df2$name), ]
+                df <- rbind(df, d_list)
+                df <- df[order(df$name), ]
 
          }
     }
 
     if (type %in% allowed_type_values_file) {
-      final <- df2[df2$type == "file", ]
+      final <- df[df$type == "file", ]
       cond_message(paste(nrow(final), "file(s) in SFTP folder."))
     } else if (type %in% allowed_type_values_dir) {
-      final <- df2[df2$type == "dir", ]
+      final <- df[df$type == "dir", ]
       cond_message(paste(nrow(final), "dir(s) in SFTP folder."))
     } else {
-      final <- df2
+      final <- df
       cond_message(paste(nrow(final), "file(s) and/or dir(s) in SFTP folder."))
     }
 

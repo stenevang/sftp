@@ -1,6 +1,6 @@
 Package: sftp
 Title: SFTP file operations
-Version: 2.0.5
+Version: 2.0.6
 Date: 2021-11-14
 Authors@R: person("Theodor", "Stenevang Klemming", email = "theodor@stenevang.net", role = c("aut", "cre"))
 Description: Functions for transferring and listing files and folders in SFTP accounts 
