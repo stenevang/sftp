@@ -143,15 +143,15 @@ sftp_list <- function(sftp_connection = sftp_con,
     }
 
     cond_message(paste("SFTP url:", sftp_connection$url))
-    curlOptionsValue <- "ftplistonly = T"
+    # PROBABLY POINTLESS curlOptionsValue <- "ftplistonly = T"
     # message(Sys.time(), " begin RCurl")
     rawstring <- RCurl::getURL(url = sftp_connection$url,
                                port = sftp_connection$port,
                                userpwd = sftp_connection$userpass,
                                verbose = curlPerformVerbose,
                                ftp.use.epsv = FALSE,
-                               .encoding = encoding,
-                               .opts = RCurl::curlOptions(curlOptionsValue) )
+                               # PROBABLY POINTLESS .opts = RCurl::curlOptions(curlOptionsValue),
+                               .encoding = encoding)
     # message(Sys.time(), " end RCurl")
     separated <- strsplit(rawstring, "\n", fixed = T)
     vector <- separated[[1]]
