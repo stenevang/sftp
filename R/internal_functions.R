@@ -1,8 +1,8 @@
 
 # internal function - not exported #############################################
 trim_slashes <- function(string) {
-    #string <- gsub("^/{1,2}", "", string) # remove any leading slash
-    string <- gsub("/{1,2}$", "", string) # remove any trailing slash
+    string <- gsub("^/*", "", string) # remove any leading slash
+    string <- gsub("/*$", "", string) # remove any trailing slash
     return(string)
 } # end of internal function trim_slashes ######################################
 

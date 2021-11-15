@@ -1,7 +1,7 @@
 Package: sftp
 Title: SFTP file operations
-Version: 2.0.6
-Date: 2021-11-14
+Version: 2.0.8
+Date: 2021-11-15
 Authors@R: person("Theodor", "Stenevang Klemming", email = "theodor@stenevang.net", role = c("aut", "cre"))
 Description: Functions for transferring and listing files and folders in SFTP accounts 
     with better ease of use compared to the underlying RCurl functions.
@@ -11,7 +11,5 @@ SystemRequirements: libcurl
 Encoding: UTF-8
 LazyData: true
 Imports:
-    RCurl,
-    tidyr,
-    dplyr
+    RCurl
 RoxygenNote: 7.1.2

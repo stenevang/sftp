@@ -6,9 +6,9 @@
 \usage{
 sftp_connect(
   server = "localhost",
-  folder = "",
-  username = "",
-  password = "",
+  folder = NULL,
+  username = NULL,
+  password = NULL,
   protocol = "sftp://",
   port = 22
 )
@@ -19,17 +19,17 @@ sftp_connect(
 \item{folder}{This is the path to the folder where you want to operate. The value
 can be a single folder name in the SFTP root or a path with subfolders,
 like 'dir1/dir2/dir3'. Note that directory names are CaSe SeNsItIvE. Default
-is empty string, which takes you to the root folder.}
+is NULL, which takes you to the root folder.}
 
 \item{username}{The SFTP account username. It is recommended to not store
 your username in any script, but instead create a System Environment Variable
-and call it using \code{Sys.getenv}}
+and call it using \code{Sys.getenv} Default is NULL.}
 
 \item{password}{The SFTP account password. It is recommended to not store
 your password in any script, but instead create a System Environment Variable
 and call it using \code{Sys.getenv} IMPORTANT! Your password MUST NOT contain
 the colon character : or the at-sign @ since these characters have special use
-as delimiters in the connection string!}
+as delimiters in the connection string! Default is NULL.}
 
 \item{protocol}{Default is 'sftp://'. You will probably never change this value.}
 

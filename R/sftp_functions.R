@@ -13,15 +13,15 @@
 #' @param folder This is the path to the folder where you want to operate. The value
 #' can be a single folder name in the SFTP root or a path with subfolders,
 #' like 'dir1/dir2/dir3'. Note that directory names are CaSe SeNsItIvE. Default
-#' is empty string, which takes you to the root folder.
+#' is NULL, which takes you to the root folder.
 #' @param username The SFTP account username. It is recommended to not store
 #' your username in any script, but instead create a System Environment Variable
-#' and call it using \code{Sys.getenv}
+#' and call it using \code{Sys.getenv} Default is NULL.
 #' @param password The SFTP account password. It is recommended to not store
 #' your password in any script, but instead create a System Environment Variable
 #' and call it using \code{Sys.getenv} IMPORTANT! Your password MUST NOT contain
 #' the colon character : or the at-sign @ since these characters have special use
-#' as delimiters in the connection string!
+#' as delimiters in the connection string! Default is NULL.
 #' @param protocol Default is 'sftp://'. You will probably never change this value.
 #' @param port Default is '22'. You will probably never change this value. Theoretically,
 #' an SFTP server could be set up to respond on a port other than the default port 22.
@@ -46,9 +46,9 @@
 #'
 #' @export
 sftp_connect <- function(server   = "localhost",
-                         folder   = "",
-                         username = "",
-                         password = "",
+                         folder   = NULL,
+                         username = NULL,
+                         password = NULL,
                          protocol = "sftp://",
                          port     = 22) {
     server <- tolower(server)
@@ -57,7 +57,7 @@ sftp_connect <- function(server   = "localhost",
 
     # Important not to do tolower() on this value
     # since folder names are case sensitive on Unix/Linux
-    folder <- trim_slashes(folder)
+    if (!is.null(folder)) folder <- trim_slashes(folder)
 
     userpass <- paste0(username, ":", password)
 
@@ -66,10 +66,18 @@ sftp_connect <- function(server   = "localhost",
 
     port <- as.integer(port)
 
-    url       <- paste0(protocol, server, "/", folder, "/")
-    url_port  <- paste0(protocol, server, ":", port, "/", folder, "/")
-    login_url <- paste0(protocol, userpass, "@", server, "/", folder, "/")
-    login_url_port <- paste0(protocol, userpass, "@", server,  ":", port, "/", folder, "/")
+    url       <- paste0(protocol, server)
+    url_port  <- paste0(protocol, server, ":", port)
+    login_url <- paste0(protocol, userpass, "@", server)
+    login_url_port <- paste0(protocol, userpass, "@", server,  ":", port)
+
+    if (!is.null(folder)) {
+        folder_and_slash <- paste0("/", folder, "/")
+        url       <- paste0(url, folder_and_slash)
+        url_port  <- paste0(url_port, folder_and_slash)
+        login_url <- paste0(login_url, folder_and_slash)
+        login_url_port <- paste0(login_url_port, folder_and_slash)
+    }
 
     sftp_connection <- list(protocol       = protocol,
                             server         = server,
@@ -155,38 +163,56 @@ sftp_list <- function(sftp_connection = sftp_con,
     # message(Sys.time(), " end RCurl")
     separated <- strsplit(rawstring, "\n", fixed = T)
     vector <- separated[[1]]
-    pattern <- "^([drwx-]{10})\\s+(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+([A-z]{3})\\s+(\\d{1,2})\\s+([0-9:]{4,5})\\s+(.+)$"
-    df <- data.frame("rights" = gsub(pattern, "\\1", vector),
-                     "links" = gsub(pattern, "\\2", vector),
-                     "ownername" = gsub(pattern, "\\3", vector),
-                     "ownergroup" = gsub(pattern, "\\4", vector),
-                     "filesize" = gsub(pattern, "\\5", vector),
-                     "t1" = gsub(pattern, "\\6", vector),
-                     "t2" = gsub(pattern, "\\7", vector),
-                     "t3" = gsub(pattern, "\\8", vector),
-                     "name" = gsub(pattern, "\\9", vector), stringsAsFactors = F )
-    df$type <- ifelse(grepl("^d.*", df$rights), "dir", "file" )
+
+    column_names <- c("rights",
+                      "links",
+                      "ownername",
+                      "ownergroup",
+                      "filesize",
+                      "t1",
+                      "t2",
+                      "t3",
+                      "name")
+    if (length(vector) > 0) {
+        pattern <- "^([drwx-]{10})\\s+(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+([A-z]{3})\\s+(\\d{1,2})\\s+([0-9:]{4,5})\\s+(.+)$"
+        vector_list <- lapply(seq_along(column_names),
+                              function(x) assign(paste0("v", x),
+                                                 gsub(pattern,
+                                                      paste0("\\", x),
+                                                      vector) ) )
+        if (length(unique(sapply(vector_list, length))) > 1 | all(vector_list[[1]] == vector)) {
+            stop("Parsing of file listing raw data failed.\nResult from RCurl::getURL was not correctly parsed with regex in sftp::sftp_list.")
+        }
+        df <- as.data.frame(do.call(cbind, vector_list))
+        colnames(df) <- column_names
+        df$type <- ifelse(grepl("^d.*", df$rights), "dir", "file" )
+    } else {
+        stop("No files, no subdirectories and no parent directory returned.")
+    }
 
     if (recurse) {
-        dirs_found <- dplyr::filter(df, type == "dir", !name %in% c(".", ".."))
+        dirs_found <- df[df$type == "dir" & !df$name %in% c(".", ".."), ]
         dirs_found <- dirs_found$name
-         for (d in dirs_found) {
+        if (length(dirs_found) > 0) {
+            for (d in dirs_found) {
+                # message("Directory ", d)
                 d_con <- sftp_connect(server = sftp_connection$server,
                                       folder = paste0(sftp_connection$folder, "/", d),
                                       username = sftp_connection$username,
                                       password = sftp_connection$password,
                                       protocol = sftp_connection$protocol,
                                       port     = sftp_connection$port)
-                d_list <- sftp_list(sftp_connection = d_con,
+                d_df <- sftp_list(sftp_connection = d_con,
                                     recurse = T)
-                d_list <- dplyr::filter(d_list, !name %in% c(".", ".."))
-                d_list$name <- paste0(d, "/", d_list$name)
-
-                df <- rbind(df, d_list)
-                df <- df[order(df$name), ]
-
-         }
-    }
+                d_df <- d_df[!d_df$name %in% c(".", ".."), ]
+                if (nrow(d_df) > 0) {
+                    d_df$name <- paste0(d, "/", d_df$name)
+                    df <- rbind(df, d_df)
+                    df <- df[order(df$name), ]
+                } # end if length > 0
+            } # end for
+        } # end if length > 0
+    } # end if recurse
 
     if (type %in% allowed_type_values_file) {
       final <- df[df$type == "file", ]
