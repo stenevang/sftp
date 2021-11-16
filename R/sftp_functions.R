@@ -25,6 +25,7 @@
 #' @param protocol Default is 'sftp://'. You will probably never change this value.
 #' @param port Default is '22'. You will probably never change this value. Theoretically,
 #' an SFTP server could be set up to respond on a port other than the default port 22.
+#' @param timeout RCurl connection timeout in seconds. Default is 30.
 #' @return The function returns a list of strings which are used by all other
 #' functions in the sftp package when connecting to an SFTP server.
 #'
@@ -40,7 +41,8 @@
 #'                          username = Sys.getenv("MY_SFTP_USER"),
 #'                          password = Sys.getenv("MY_SFTP_PASS"),
 #'                          protocol = "sftp://",
-#'                          port = 22)
+#'                          port = 22,
+#'                          timeout = 60)
 #'
 #' @seealso See listing here: \link{sftp}
 #'
@@ -50,7 +52,8 @@ sftp_connect <- function(server   = "localhost",
                          username = NULL,
                          password = NULL,
                          protocol = "sftp://",
-                         port     = 22) {
+                         port     = 22,
+                         timeout = 30) {
     server <- tolower(server)
     server <- gsub("^.*://", "", server) # remove any sftp:// or http:// etc
     server <- trim_slashes(server)
@@ -65,6 +68,7 @@ sftp_connect <- function(server   = "localhost",
     protocol <- gsub("://://$", "://", protocol) # remove double ://
 
     port <- as.integer(port)
+    timeout <- as.integer(timeout)
 
     url       <- paste0(protocol, server)
     url_port  <- paste0(protocol, server, ":", port)
@@ -89,7 +93,8 @@ sftp_connect <- function(server   = "localhost",
                             url            = url,
                             url_port       = url_port,
                             login_url      = login_url,
-                            login_url_port = login_url_port)
+                            login_url_port = login_url_port,
+                            timeout        = timeout)
     return(sftp_connection)
 }
 
@@ -97,6 +102,7 @@ sftp_connect <- function(server   = "localhost",
 #'
 #' This function lists files, or folders, or both in the SFTP location
 #' specified by a list object created by calling \link{sftp_connect}.
+#' \code{sftp_list} internally calls \code{RCurl::getURL}
 #' Convenience wrapper functions are available:
 #' \link{sftp_listfiles} and \link{sftp_listdirs}
 #' Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
@@ -109,6 +115,7 @@ sftp_connect <- function(server   = "localhost",
 #' @param encoding Explicitly identifies the encoding of the content that is returned by the server in its response. Possible values are ‘UTF-8’ or ‘ISO-8859-1’. Default is 'UTF-8'.
 #' @param type One of "f", "file" (for list files), "d", "dir", "directory" (for list directories), "all" (for both files and directories, default).
 #' @param recurse Logical. Recurse directories? Default is FALSE.
+#' @param curl_options A list of named values with names as listed by \code{RCurl::listCurlOptions}. The values are handed to the .opts parameter of the RCurl function called by \code{sftp_list}. Optional. Default is an empty list.
 #'
 #' @return A dataframe
 #'
@@ -131,7 +138,8 @@ sftp_list <- function(sftp_connection = sftp_con,
                       curlPerformVerbose = FALSE,
                       encoding = "UTF-8",
                       type = "all",
-                      recurse = F) {
+                      recurse = F,
+                      curl_options = list() ) {
 
     type <- tolower(type)
 
@@ -151,15 +159,15 @@ sftp_list <- function(sftp_connection = sftp_con,
     }
 
     cond_message(paste("SFTP url:", sftp_connection$url))
-    # PROBABLY POINTLESS curlOptionsValue <- "ftplistonly = T"
     # message(Sys.time(), " begin RCurl")
     rawstring <- RCurl::getURL(url = sftp_connection$url,
                                port = sftp_connection$port,
                                userpwd = sftp_connection$userpass,
+                               timeout = sftp_connection$timeout,
                                verbose = curlPerformVerbose,
                                ftp.use.epsv = FALSE,
-                               # PROBABLY POINTLESS .opts = RCurl::curlOptions(curlOptionsValue),
-                               .encoding = encoding)
+                               .encoding = encoding,
+                               .opts = curl_options)
     # message(Sys.time(), " end RCurl")
     separated <- strsplit(rawstring, "\n", fixed = T)
     vector <- separated[[1]]
@@ -201,9 +209,15 @@ sftp_list <- function(sftp_connection = sftp_con,
                                       username = sftp_connection$username,
                                       password = sftp_connection$password,
                                       protocol = sftp_connection$protocol,
-                                      port     = sftp_connection$port)
+                                      port     = sftp_connection$port,
+                                      timeout  = sftp_connection$timeout)
                 d_df <- sftp_list(sftp_connection = d_con,
-                                    recurse = T)
+                                  verbose = verbose,
+                                  curlPerformVerbose = curlPerformVerbose,
+                                  encoding = encoding,
+                                  type = type,
+                                  recurse = T,
+                                  curl_options = curl_options)
                 d_df <- d_df[!d_df$name %in% c(".", ".."), ]
                 if (nrow(d_df) > 0) {
                     d_df$name <- paste0(d, "/", d_df$name)
@@ -239,6 +253,9 @@ sftp_list <- function(sftp_connection = sftp_con,
 #' @param curlPerformVerbose Logical. Turn on messages to console from RCurl::curlPerform.
 #' Default is FALSE.
 #' @param recurse Logical. Recurse directories? Default is FALSE.
+#' @param curl_options A list of named values with names as listed by
+#' \code{RCurl::listCurlOptions}. The values are handed to the .opts parameter
+#' of the RCurl function called by \code{sftp_listfiles}. Optional. Default is an empty list.
 #'
 #' @return A dataframe
 #'
@@ -258,13 +275,15 @@ sftp_list <- function(sftp_connection = sftp_con,
 sftp_listfiles <- function(sftp_connection = sftp_con,
                            verbose = TRUE,
                            curlPerformVerbose = FALSE,
-                           recurse = FALSE) {
+                           recurse = FALSE,
+                           curl_options = list() ) {
 
     final <- sftp_list(sftp_connection = sftp_connection,
                        verbose = verbose,
                        curlPerformVerbose = curlPerformVerbose,
                        type = "file",
-                       recurse = recurse)
+                       recurse = recurse,
+                       curl_options = curl_options)
 
     return(final)
 }
@@ -282,6 +301,9 @@ sftp_listfiles <- function(sftp_connection = sftp_con,
 #' @param curlPerformVerbose Logical. Turn on messages to console from RCurl::curlPerform.
 #' Default is FALSE.
 #' @param recurse Logical. Recurse directories? Default is FALSE.
+#' @param curl_options A list of named values with names as listed by
+#' \code{RCurl::listCurlOptions}. The values are handed to the .opts parameter
+#' of the RCurl function called by \code{sftp_listdirs}. Optional. Default is an empty list.
 #'
 #' @return A dataframe
 #'
@@ -300,13 +322,15 @@ sftp_listfiles <- function(sftp_connection = sftp_con,
 sftp_listdirs <- function(sftp_connection = sftp_con,
                           verbose = TRUE,
                           curlPerformVerbose = FALSE,
-                          recurse = FALSE) {
+                          recurse = FALSE,
+                          curl_options = list() ) {
 
     final <- sftp_list(sftp_connection = sftp_connection,
                        verbose = verbose,
                        curlPerformVerbose = curlPerformVerbose,
                        type = "dir",
-                       recurse = recurse)
+                       recurse = recurse,
+                       curl_options = curl_options)
 
     return(final)
 }
@@ -320,6 +344,7 @@ sftp_listdirs <- function(sftp_connection = sftp_con,
 #' created by calling \link{sftp_connect}. The files will be downloaded from
 #' the SFTP account folder where you are currently "standing" as specified in the
 #' connection list object.
+#' \code{sftp_download} internally calls \code{RCurl::getBinaryURL}
 #' Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 #'
 #' @param file A character vector of file names. If the wildcard "*" is used, then
@@ -330,6 +355,10 @@ sftp_listdirs <- function(sftp_connection = sftp_con,
 #' If the folder does not exist it will be created.
 #' @param sftp_connection A list object created with \code{link{sftp_connect}}. Default is 'sftp_con'.
 #' @param verbose Logical. Turn on messages to console. Default is TRUE.
+#' @param curl_options A list of named values with names as listed by
+#' \code{RCurl::listCurlOptions}. The values are handed to the .opts parameter
+#' of the RCurl function called by \code{sftp_download}. Optional. Default is an empty list.
+#'
 #' @return The function returns the number of files downloaded, following successful download.
 #'
 #' @examples
@@ -340,7 +369,7 @@ sftp_listdirs <- function(sftp_connection = sftp_con,
 #' # take a vector of file names from a dataframe
 #' sftp_download(file = files$name, tofolder = "my/relative/path")
 #'
-#' # take one specific file name from a vector from a dataframe
+#' # take one specific file name from a column in a dataframe
 #' sftp_download(file = files$name[1], tofolder = getwd() )
 #'
 #'
@@ -351,7 +380,8 @@ sftp_listdirs <- function(sftp_connection = sftp_con,
 sftp_download <- function(file,
                           tofolder = getwd(),
                           sftp_connection = sftp_con,
-                          verbose = TRUE) {
+                          verbose = TRUE,
+                          curl_options = list() ) {
 
     tofolder <- trim_slashes(tofolder)
 
@@ -374,15 +404,22 @@ sftp_download <- function(file,
     cond_message(paste(length(file), "file(s) to download."))
     filecounter = 0
     for (f in file) {
-        fileurl <- paste0(sftp_connection$url, f)
+        fileurl <- paste0(sftp_connection$url, "/", f)
         port    <- as.integer(sftp_connection$port)
         userpwd <- sftp_connection$userpass
         filedestination <- file.path(tofolder, f)
+        timeout <- sftp_connection$timeout
         if ( !dir.exists(dirname(filedestination)) ) {
           dir.create(dirname(filedestination), recursive = T)
           message("Creating folder ", dirname(filedestination) )
         }
-        writeBin(object = RCurl::getBinaryURL(url = fileurl, port = port, userpwd = userpwd, dirlistonly = FALSE), con = filedestination)
+        writeBin(object = RCurl::getBinaryURL(url = fileurl,
+                                              port = port,
+                                              userpwd = userpwd,
+                                              timeout = timeout,
+                                              .opts = curl_options,
+                                              dirlistonly = FALSE),
+                 con = filedestination)
         filecounter = filecounter + 1
         cond_message(paste(f, "downloaded") )
     }
@@ -397,6 +434,7 @@ sftp_download <- function(file,
 #' created by calling \link{sftp_connect}. The files will be uploaded to
 #' the SFTP account folder where you are currently "standing" as specified in the
 #' connection list object.
+#' \code{sftp_upload} internally calls \code{RCurl::ftpUpload}
 #' Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 #'
 #' @param file A character vector of file names. If the wildcard "*" is used, then
@@ -407,6 +445,10 @@ sftp_download <- function(file,
 #' @param sftp_connection A list object created with \code{link{sftp_connect}}. Default is \code{sftp_con}.
 #' @param log_file Valid path to a text file (.txt, .csv, .log etc) including filename and file extension.
 #' @param verbose Logical. Turn on messages to console. Default is TRUE.
+#' @param curl_options A list of named values with names as listed by
+#' \code{RCurl::listCurlOptions}. The values are handed to the .opts parameter
+#' of the RCurl function called by \code{sftp_upload}. Optional. Default is an empty list.
+#'
 #' @return The function returns the number of files uploaded, following successful upload.
 #'
 #' @examples
@@ -429,15 +471,15 @@ sftp_upload <- function(file,
                         fromfolder = getwd(),
                         sftp_connection = sftp_con,
                         log_file = NA,
-                        verbose = TRUE) {
+                        verbose = TRUE,
+                        curl_options = list() ) {
 
     fromfolder <- trim_slashes(fromfolder)
 
     using_wildcard <- FALSE
     if (length(file) == 1) {
         if (file == "*") {
-            file <- list.files(path = fromfolder)
-            file <- file[!file.info(file)$isdir] #removing directories from the listing
+            file <- list.files(path = fromfolder, full.names = F, all.files = F)
             using_wildcard <- TRUE
         }
     }
@@ -453,14 +495,17 @@ sftp_upload <- function(file,
     filecounter = 0
     for (f in file) {
         filesource <- file.path(fromfolder, f)
-        fileurl    <- paste0(sftp_connection$url, f)
+        fileurl    <- paste0(sftp_connection$url, "/", f)
         port       <- sftp_connection$port
         userpwd    <- sftp_connection$userpass
+        timeout    <- sftp_connection$timeout
         RCurl::ftpUpload(what = filesource,
                          asText = FALSE,
                          to = fileurl,
                          port = port,
-                         userpwd = userpwd)
+                         userpwd = userpwd,
+                         timeout = timeout,
+                         .opts = curl_options)
 
         filecounter = filecounter + 1
         cond_message(paste(f, "uploaded") )
@@ -489,6 +534,7 @@ sftp_upload <- function(file,
 #' Delete files in an SFTP account
 #'
 #' Specify a file name or a vector of file names to delete in an SFTP account.
+#' \code{sftp_delete} internally calls \code{RCurl::curlPerform}
 #' Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 #'
 #' @param file A vector of one or more file names that exist on the SFTP url.
@@ -501,6 +547,9 @@ sftp_upload <- function(file,
 #' @param verbose Logical. Turn on messages to console. Default is TRUE
 #' @param curlPerformVerbose Logical. Turn on messages to console form curlPerform.
 #' Default is FALSE.
+#' @param curl_options A list of named values with names as listed by
+#' \code{RCurl::listCurlOptions}. The values are handed to the .opts parameter
+#' of the RCurl function called by \code{sftp_delete}. Optional. Default is an empty list.
 #' @return The function returns the number of files deleted.
 #'
 #' @examples
@@ -520,7 +569,8 @@ sftp_upload <- function(file,
 sftp_delete <- function(file,
                         sftp_connection = sftp_con,
                         verbose = TRUE,
-                        curlPerformVerbose = FALSE) {
+                        curlPerformVerbose = FALSE,
+                        curl_options = list() ) {
 
     # This function does not support use of wildcard
     # for filenames to avoid the risk of massive
@@ -536,11 +586,13 @@ sftp_delete <- function(file,
     for (f in file) {
         deletepath <- paste0("'/", sftp_connection$folder, "/", f, "'")
         cond_message(deletepath)
-        curlPerform(url = sftp_connection$url,
-                    port = sftp_connection$port,
-                    userpwd = sftp_connection$userpass,
-                    verbose = curlPerformVerbose,
-                    quote = paste("rm", deletepath) )
+        RCurl::curlPerform(url = sftp_connection$url,
+                           port = sftp_connection$port,
+                           userpwd = sftp_connection$userpass,
+                           timeout = sftp_connection$timeout,
+                           verbose = curlPerformVerbose,
+                           quote = paste("rm", deletepath),
+                           .opts = curl_options)
         filecounter = filecounter + 1
         cond_message(paste(f, "deleted.") )
     }
@@ -555,6 +607,7 @@ sftp_delete <- function(file,
 #' Specify a current name and a new name, for a file or folder existing in an SFTP account.
 #' While folders must be empty when using \link{sftp_removedir}, that is not the case with
 #' \code{sftp_rename} - non-empty folders can be renamed.
+#' \code{sftp_rename} internally calls \code{RCurl::curlPerform}
 #' Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 #'
 #' @param from A single name of an existing file or folder. If a vector of names is supplied, only
@@ -566,6 +619,9 @@ sftp_delete <- function(file,
 #' @param verbose Logical. Turn on messages to console. Default is TRUE
 #' @param curlPerformVerbose Logical. Turn on messages to console form curlPerform.
 #' Default is FALSE.
+#' @param curl_options A list of named values with names as listed by
+#' \code{RCurl::listCurlOptions}. The values are handed to the .opts parameter
+#' of the RCurl function called by \code{sftp_rename}. Optional. Default is an empty list.
 #' @return The function returns TRUE if successful.
 #'
 #' @examples
@@ -587,7 +643,8 @@ sftp_rename<- function(from,
                        to,
                        sftp_connection = sftp_con,
                        verbose = TRUE,
-                       curlPerformVerbose = FALSE) {
+                       curlPerformVerbose = FALSE,
+                       curl_options = list() ) {
 
     if ( missing(from) ) {
         message("No value for argument 'from' supplied.")
@@ -627,11 +684,13 @@ sftp_rename<- function(from,
     from <- paste0("'/", sftp_connection$folder, "/", from, "'")
     to   <- paste0("'/", sftp_connection$folder, "/", to, "'")
     argument <- paste("rename", from, to)
-    curlPerform(url = sftp_connection$url,
-                port = sftp_connection$port,
-                userpwd = sftp_connection$userpass,
-                verbose = curlPerformVerbose,
-                quote = argument )
+    RCurl::curlPerform(url = sftp_connection$url,
+                       port = sftp_connection$port,
+                       userpwd = sftp_connection$userpass,
+                       verbose = curlPerformVerbose,
+                       timeout = sftp_connection$timeout,
+                       quote = argument,
+                       .opts = curl_options)
     cond_message(paste("Old name:", from))
     cond_message(paste("New name:", to))
 
@@ -644,6 +703,7 @@ sftp_rename<- function(from,
 #' Create one or several directories (subdirectories) in an SFTP account.
 #' The function uses connection credentials from a list object
 #' created by calling \link{sftp_connect}.
+#' \code{sftp_makedir} internally calls \code{RCurl::curlPerform}
 #' Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 #'
 #' @param foldername A character vector of length 1 or more, containing the names
@@ -657,6 +717,9 @@ sftp_rename<- function(from,
 #' @param verbose Logical. Turn on messages to console. Default is TRUE
 #' @param curlPerformVerbose Logical. Turn on messages to console form curlPerform.
 #' Default is FALSE.
+#' @param curl_options A list of named values with names as listed by
+#' \code{RCurl::listCurlOptions}. The values are handed to the .opts parameter
+#' of the RCurl function called by \code{sftp_makedir}. Optional. Default is an empty list.
 #' @return The function returns the number of new folders created.
 #'
 #' @examples
@@ -679,7 +742,8 @@ sftp_rename<- function(from,
 sftp_makedir <- function(foldername,
                          sftp_connection = sftp_con,
                          verbose = TRUE,
-                         curlPerformVerbose = FALSE) {
+                         curlPerformVerbose = FALSE,
+                         curl_options = list() ) {
 
     if (!is.vector(foldername) ) {
         message("Error: Value of argument 'foldername' is not a vector.")
@@ -696,13 +760,16 @@ sftp_makedir <- function(foldername,
 
     cond_message(paste("SFTP url:", sftp_connection$url))
     cond_message(paste(length(foldername), "folder(s) to create."))
+    # TODO: list dirs to check if directory exists
     filecounter = 0
     for (f in foldername) {
-        curlPerform(url = sftp_connection$url,
-                    port = sftp_connection$port,
-                    userpwd = sftp_connection$userpass,
-                    verbose = curlPerformVerbose,
-                    quote = paste0("mkdir ", "'/", sftp_connection$folder, "/", f, "'") )
+        RCurl::curlPerform(url = sftp_connection$url,
+                           port = sftp_connection$port,
+                           userpwd = sftp_connection$userpass,
+                           verbose = curlPerformVerbose,
+                           timeout = sftp_connection$timeout,
+                           quote = paste0("mkdir ", "'/", sftp_connection$folder, "/", f, "'"),
+                           .opts = curl_options )
         filecounter = filecounter + 1
         cond_message(paste(f, "folder created.") )
     }
@@ -716,6 +783,7 @@ sftp_makedir <- function(foldername,
 #' Remove one or several directories (subdirectories) in an SFTP account.
 #' The function uses connection credentials from a list object
 #' created by calling \link{sftp_connect}.
+#' \code{sftp_removedir} internally calls \code{RCurl::curlPerform}
 #' Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 #'
 #' @param foldername A character vector of length 1 or more, containing the names
@@ -730,6 +798,9 @@ sftp_makedir <- function(foldername,
 #' @param verbose Logical. Turn on messages to console. Default is TRUE
 #' @param curlPerformVerbose Logical. Turn on messages to console form curlPerform.
 #' Default is FALSE.
+#' @param curl_options A list of named values with names as listed by
+#' \code{RCurl::listCurlOptions}. The values are handed to the .opts parameter
+#' of the RCurl function called by \code{sftp_removedir}. Optional. Default is an empty list.
 #' @return The function returns the number folders deleted.
 #'
 #' @examples
@@ -752,7 +823,8 @@ sftp_makedir <- function(foldername,
 sftp_removedir <- function(foldername,
                            sftp_connection = sftp_con,
                            verbose = TRUE,
-                           curlPerformVerbose = FALSE) {
+                           curlPerformVerbose = FALSE,
+                           curl_options = list() ) {
 
     if (!is.vector(foldername) ) {
         message("Error: Value of argument 'foldername' is not a vector.")
@@ -769,13 +841,16 @@ sftp_removedir <- function(foldername,
 
     cond_message(paste("SFTP url:", sftp_connection$url))
     cond_message(paste(length(foldername), "folder(s) to remove."))
+    # TODO: list dirs to check if directory exists
     filecounter = 0
     for (f in foldername) {
-        curlPerform(url = sftp_connection$url,
-                    port = sftp_connection$port,
-                    userpwd = sftp_connection$userpass,
-                    verbose = curlPerformVerbose,
-                    quote = paste0("rmdir ", "'/", sftp_connection$folder, "/", f, "'") )
+        RCurl::curlPerform(url = sftp_connection$url,
+                           port = sftp_connection$port,
+                           userpwd = sftp_connection$userpass,
+                           verbose = curlPerformVerbose,
+                           timeout = sftp_connection$timeout,
+                           quote = paste0("rmdir ", "'/", sftp_connection$folder, "/", f, "'"),
+                           .opts = curl_options)
         filecounter = filecounter + 1
         cond_message(paste(f, "folder removed.") )
     }
@@ -803,8 +878,6 @@ sftp_removedir <- function(foldername,
 #' list object currently used, created  by calling \link{sftp_connect}.
 #' Default is \code{"sftp_con"}.
 #' @param verbose Logical. Turn on messages to console. Default is TRUE
-#' @param curlPerformVerbose Logical. Turn on messages to console form curlPerform.
-#' Default is FALSE.
 #' @return The function returns TRUE after successful change of directory.
 #'
 #' @examples
@@ -818,8 +891,7 @@ sftp_removedir <- function(foldername,
 #' # explicit - change to a directory at the end of a multi-level path
 #' sftp_changedir(tofolder = "level1/folder2/directory3",
 #'                current_connection_name = "sftp_con",
-#'                verbose = TRUE,
-#'                curlPerformVerbose = FALSE)
+#'                verbose = TRUE)
 #'
 #'
 #' @seealso \link{sftp_makedir}, \link{sftp_removedir}, \link{sftp_rename}, \link{sftp}
@@ -827,8 +899,7 @@ sftp_removedir <- function(foldername,
 #' @export
 sftp_changedir <- function(tofolder,
                            current_connection_name = "sftp_con",
-                           verbose = TRUE,
-                           curlPerformVerbose = FALSE) {
+                           verbose = TRUE) {
 
     if (!is.vector(tofolder) ) {
         message("Error: Value of argument 'tofolder' is not a vector.")
@@ -846,41 +917,46 @@ sftp_changedir <- function(tofolder,
 
     tofolder <- unlist(strsplit(tofolder, split = "/"))
 
+
     cond_message <- function(mess, v = verbose) {
         if (v) { message(mess) }
     }
 
     parent_frame <- parent.frame()
-    sftp_connection <- parent_frame[[ current_connection_name ]]
+    sftp_connection <- parent_frame[[current_connection_name]]
+
+    if (!identical(tofolder, character(0) ) ) {
+        cond_message(paste("SFTP url:", sftp_connection$url))
+        for (i in seq_along(tofolder) ) {
+            current_folder <- sftp_connection$folder
+            if (tofolder[i] == "..") {
+                new_folder <- dirname(current_folder)
+                cond_message(paste("Moving up one level.", ""))
+            } else if (tofolder[i] == "root") {
+                new_folder <- NULL
+                cond_message(paste("Moving to root folder.", ""))
+            } else {
+                new_folder <- paste0(current_folder, "/", tofolder[i])
+                cond_message(paste("Moving down into", new_folder))
+            }
+
+            if (new_folder == ".") new_folder <- NULL
+
+            sftp_connection <- sftp_connect(server = sftp_connection$server,
+                                            folder = new_folder,
+                                            username = sftp_connection$username,
+                                            password = sftp_connection$password,
+                                            protocol = sftp_connection$protocol,
+                                            port = sftp_connection$port,
+                                            timeout = sftp_connection$timeout)
+        } # end for loop
+        assign(x = current_connection_name, envir = parent.frame(), value = sftp_connection)
+
+    } # end if
 
     cond_message(paste("SFTP url:", sftp_connection$url))
 
-    for (i in seq_along(tofolder) ) {
-      current_folder <- sftp_connection$folder
-      # backing up one level
-      if (tofolder[i] == "..") {
-        new_folder <- gsub("(^.*?)/.[^/].*?$", "\\1", current_folder)
-        cond_message(paste("Moving up one level.", ""))
-      } else if (tofolder[i] == "root" | tofolder[i] == "") {
-        new_folder <- ""
-        cond_message(paste("Moving to root folder.", ""))
-      } else {
-        new_folder <- paste0(current_folder, "/", tofolder[i])
-        cond_message(paste("Moving down into", new_folder))
-      }
-
-
-      sftp_connection <- sftp_connect(server = sftp_connection$server,
-                                      folder = new_folder,
-                                      username = sftp_connection$username,
-                                      password = sftp_connection$password,
-                                      protocol = sftp_connection$protocol,
-                                      port = sftp_connection$port)
-    }
-
-    assign(x = current_connection_name, envir = parent.frame(), value = sftp_connection)
-
-    return(TRUE)
+    return(invisible(TRUE))
 }
 
 

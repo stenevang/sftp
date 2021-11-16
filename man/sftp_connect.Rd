@@ -10,7 +10,8 @@ sftp_connect(
   username = NULL,
   password = NULL,
   protocol = "sftp://",
-  port = 22
+  port = 22,
+  timeout = 30
 )
 }
 \arguments{
@@ -35,6 +36,8 @@ as delimiters in the connection string! Default is NULL.}
 
 \item{port}{Default is '22'. You will probably never change this value. Theoretically,
 an SFTP server could be set up to respond on a port other than the default port 22.}
+
+\item{timeout}{RCurl connection timeout in seconds. Default is 30.}
 }
 \value{
 The function returns a list of strings which are used by all other
@@ -61,7 +64,8 @@ sftp_con <- sftp_connect(server = "mysftp.com",
                          username = Sys.getenv("MY_SFTP_USER"),
                          password = Sys.getenv("MY_SFTP_PASS"),
                          protocol = "sftp://",
-                         port = 22)
+                         port = 22,
+                         timeout = 60)
 
 }
 \seealso{

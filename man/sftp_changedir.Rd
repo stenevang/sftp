@@ -4,12 +4,7 @@
 \alias{sftp_changedir}
 \title{Move to another directory in an SFTP account}
 \usage{
-sftp_changedir(
-  tofolder,
-  current_connection_name = "sftp_con",
-  verbose = TRUE,
-  curlPerformVerbose = FALSE
-)
+sftp_changedir(tofolder, current_connection_name = "sftp_con", verbose = TRUE)
 }
 \arguments{
 \item{tofolder}{A character vector of length 1 containing the name
@@ -25,9 +20,6 @@ list object currently used, created  by calling \link{sftp_connect}.
 Default is \code{"sftp_con"}.}
 
 \item{verbose}{Logical. Turn on messages to console. Default is TRUE}
-
-\item{curlPerformVerbose}{Logical. Turn on messages to console form curlPerform.
-Default is FALSE.}
 }
 \value{
 The function returns TRUE after successful change of directory.
@@ -49,8 +41,7 @@ sftp_changedir("root")
 # explicit - change to a directory at the end of a multi-level path
 sftp_changedir(tofolder = "level1/folder2/directory3",
                current_connection_name = "sftp_con",
-               verbose = TRUE,
-               curlPerformVerbose = FALSE)
+               verbose = TRUE)
 
 
 }

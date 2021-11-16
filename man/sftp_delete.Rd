@@ -8,7 +8,8 @@ sftp_delete(
   file,
   sftp_connection = sftp_con,
   verbose = TRUE,
-  curlPerformVerbose = FALSE
+  curlPerformVerbose = FALSE,
+  curl_options = list()
 )
 }
 \arguments{
@@ -25,12 +26,17 @@ Default is 'sftp_con'.}
 
 \item{curlPerformVerbose}{Logical. Turn on messages to console form curlPerform.
 Default is FALSE.}
+
+\item{curl_options}{A list of named values with names as listed by
+\code{RCurl::listCurlOptions}. The values are handed to the .opts parameter
+of the RCurl function called by \code{sftp_delete}. Optional. Default is an empty list.}
 }
 \value{
 The function returns the number of files deleted.
 }
 \description{
 Specify a file name or a vector of file names to delete in an SFTP account.
+\code{sftp_delete} internally calls \code{RCurl::curlPerform}
 Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 }
 \examples{

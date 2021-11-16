@@ -8,7 +8,8 @@ sftp_makedir(
   foldername,
   sftp_connection = sftp_con,
   verbose = TRUE,
-  curlPerformVerbose = FALSE
+  curlPerformVerbose = FALSE,
+  curl_options = list()
 )
 }
 \arguments{
@@ -26,6 +27,10 @@ Default is \code{sftp_con}.}
 
 \item{curlPerformVerbose}{Logical. Turn on messages to console form curlPerform.
 Default is FALSE.}
+
+\item{curl_options}{A list of named values with names as listed by
+\code{RCurl::listCurlOptions}. The values are handed to the .opts parameter
+of the RCurl function called by \code{sftp_makedir}. Optional. Default is an empty list.}
 }
 \value{
 The function returns the number of new folders created.
@@ -34,6 +39,7 @@ The function returns the number of new folders created.
 Create one or several directories (subdirectories) in an SFTP account.
 The function uses connection credentials from a list object
 created by calling \link{sftp_connect}.
+\code{sftp_makedir} internally calls \code{RCurl::curlPerform}
 Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 }
 \examples{

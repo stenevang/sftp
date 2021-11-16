@@ -9,7 +9,8 @@ sftp_upload(
   fromfolder = getwd(),
   sftp_connection = sftp_con,
   log_file = NA,
-  verbose = TRUE
+  verbose = TRUE,
+  curl_options = list()
 )
 }
 \arguments{
@@ -25,6 +26,10 @@ the folder where the files in \code{file} can be found. Default is the working d
 \item{log_file}{Valid path to a text file (.txt, .csv, .log etc) including filename and file extension.}
 
 \item{verbose}{Logical. Turn on messages to console. Default is TRUE.}
+
+\item{curl_options}{A list of named values with names as listed by
+\code{RCurl::listCurlOptions}. The values are handed to the .opts parameter
+of the RCurl function called by \code{sftp_upload}. Optional. Default is an empty list.}
 }
 \value{
 The function returns the number of files uploaded, following successful upload.
@@ -35,6 +40,7 @@ The function uses connection credentials from a list object
 created by calling \link{sftp_connect}. The files will be uploaded to
 the SFTP account folder where you are currently "standing" as specified in the
 connection list object.
+\code{sftp_upload} internally calls \code{RCurl::ftpUpload}
 Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 }
 \examples{

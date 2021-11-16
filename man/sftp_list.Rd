@@ -10,7 +10,8 @@ sftp_list(
   curlPerformVerbose = FALSE,
   encoding = "UTF-8",
   type = "all",
-  recurse = F
+  recurse = F,
+  curl_options = list()
 )
 }
 \arguments{
@@ -27,6 +28,8 @@ Default is FALSE.}
 \item{type}{One of "f", "file" (for list files), "d", "dir", "directory" (for list directories), "all" (for both files and directories, default).}
 
 \item{recurse}{Logical. Recurse directories? Default is FALSE.}
+
+\item{curl_options}{A list of named values with names as listed by \code{RCurl::listCurlOptions}. The values are handed to the .opts parameter of the RCurl function called by \code{sftp_list}. Optional. Default is an empty list.}
 }
 \value{
 A dataframe
@@ -34,6 +37,7 @@ A dataframe
 \description{
 This function lists files, or folders, or both in the SFTP location
 specified by a list object created by calling \link{sftp_connect}.
+\code{sftp_list} internally calls \code{RCurl::getURL}
 Convenience wrapper functions are available:
 \link{sftp_listfiles} and \link{sftp_listdirs}
 Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}

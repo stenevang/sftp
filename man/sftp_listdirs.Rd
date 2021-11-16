@@ -8,7 +8,8 @@ sftp_listdirs(
   sftp_connection = sftp_con,
   verbose = TRUE,
   curlPerformVerbose = FALSE,
-  recurse = FALSE
+  recurse = FALSE,
+  curl_options = list()
 )
 }
 \arguments{
@@ -21,6 +22,10 @@ Default value is \code{sftp_con}.}
 Default is FALSE.}
 
 \item{recurse}{Logical. Recurse directories? Default is FALSE.}
+
+\item{curl_options}{A list of named values with names as listed by
+\code{RCurl::listCurlOptions}. The values are handed to the .opts parameter
+of the RCurl function called by \code{sftp_listdirs}. Optional. Default is an empty list.}
 }
 \value{
 A dataframe

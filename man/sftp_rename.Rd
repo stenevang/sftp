@@ -9,7 +9,8 @@ sftp_rename(
   to,
   sftp_connection = sftp_con,
   verbose = TRUE,
-  curlPerformVerbose = FALSE
+  curlPerformVerbose = FALSE,
+  curl_options = list()
 )
 }
 \arguments{
@@ -26,6 +27,10 @@ Default is \code{sftp_con}.}
 
 \item{curlPerformVerbose}{Logical. Turn on messages to console form curlPerform.
 Default is FALSE.}
+
+\item{curl_options}{A list of named values with names as listed by
+\code{RCurl::listCurlOptions}. The values are handed to the .opts parameter
+of the RCurl function called by \code{sftp_rename}. Optional. Default is an empty list.}
 }
 \value{
 The function returns TRUE if successful.
@@ -34,6 +39,7 @@ The function returns TRUE if successful.
 Specify a current name and a new name, for a file or folder existing in an SFTP account.
 While folders must be empty when using \link{sftp_removedir}, that is not the case with
 \code{sftp_rename} - non-empty folders can be renamed.
+\code{sftp_rename} internally calls \code{RCurl::curlPerform}
 Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 }
 \examples{

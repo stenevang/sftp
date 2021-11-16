@@ -8,7 +8,8 @@ sftp_download(
   file,
   tofolder = getwd(),
   sftp_connection = sftp_con,
-  verbose = TRUE
+  verbose = TRUE,
+  curl_options = list()
 )
 }
 \arguments{
@@ -23,6 +24,10 @@ If the folder does not exist it will be created.}
 \item{sftp_connection}{A list object created with \code{link{sftp_connect}}. Default is 'sftp_con'.}
 
 \item{verbose}{Logical. Turn on messages to console. Default is TRUE.}
+
+\item{curl_options}{A list of named values with names as listed by
+\code{RCurl::listCurlOptions}. The values are handed to the .opts parameter
+of the RCurl function called by \code{sftp_download}. Optional. Default is an empty list.}
 }
 \value{
 The function returns the number of files downloaded, following successful download.
@@ -33,6 +38,7 @@ The function uses connection credentials from a list object
 created by calling \link{sftp_connect}. The files will be downloaded from
 the SFTP account folder where you are currently "standing" as specified in the
 connection list object.
+\code{sftp_download} internally calls \code{RCurl::getBinaryURL}
 Questions? \href{https://github.com/stenevang/sftp}{https://github.com/stenevang/sftp}
 }
 \examples{
@@ -43,7 +49,7 @@ sftp_download("*")
 # take a vector of file names from a dataframe
 sftp_download(file = files$name, tofolder = "my/relative/path")
 
-# take one specific file name from a vector from a dataframe
+# take one specific file name from a column in a dataframe
 sftp_download(file = files$name[1], tofolder = getwd() )
 
 
