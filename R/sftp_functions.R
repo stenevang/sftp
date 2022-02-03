@@ -54,6 +54,10 @@ sftp_connect <- function(server   = "localhost",
                          protocol = "sftp://",
                          port     = 22,
                          timeout = 30) {
+
+    libcurl_status <- sftp:::check_libcurl()
+    if (libcurl_status != "OK") stop(libcurl_status)
+
     server <- tolower(server)
     server <- gsub("^.*://", "", server) # remove any sftp:// or http:// etc
     server <- trim_slashes(server)
